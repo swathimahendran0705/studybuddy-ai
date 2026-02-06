@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+   <!-- UPLOAD NOTES -->
+<div class="notes-container">
+  <h2>Upload Your Notes</h2>
+
+  <input type="file" id="fileInput" name="notes" multiple />
+
+  <button id="uploadBtn">Upload Files</button>
+
+  <p id="uploadStatus"></p>
+  <div id="notesGrid" class="notes-grid"></div>
+</div>
+
+<!-- =========================
+     HINTS MAKER + MCQ SECTION
+========================= -->
+<div class="hints-container">
+  <h2>Hints Maker & MCQ Generator</h2>
+
+  <!-- Top Controls -->
+  <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:15px;">
+    <select id="notesSelect">
+      <option value="">-- Select a note --</option>
+    </select>
+
+    
+    <button id="generateHintsBtn">Generate Hints</button>
+    
+  </div>
+
+  
+
+  <!-- HINTS OUTPUT BOX -->
+  <div id="hintsOutput" class="sb-box"></div>
+</div>
+  
+
+ 
+
+  
+<style>
+/* ================= ROOT VARIABLES ================= */
+:root {
+  --sb-brand: #81ecec;       /* main aqua brand */
+  --sb-accent: #a29bfe;      /* lavender accent */
+  --sb-bg: #f4f7ff;          /* app background */
+  --sb-glass: rgba(255,255,255,0.55);
+  --sb-text-dark: #2e2e38;
+  --sb-text-soft: #6b6b7a;
+  --sb-radius: 18px;
+  --sb-shadow-soft: 0 12px 30px rgba(0,0,0,0.12);
+  --sb-shadow-hover: 0 20px 45px rgba(0,0,0,0.22);
+}
+
+/* ================= BODY ================= */
+body {
+  min-height: 100vh;
+  margin: 0;
+
+  /* Image + Theme Gradient */
+  background:
+    linear-gradient(
+      to bottom right,
+      rgba(129,236,236,0.85),
+      rgba(162,155,254,0.85)
+    ),
+    url("https://images.unsplash.com/photo-1522202176988-66273c2fd55f");
+
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+
+  font-family: 'Poppins', 'Inter', sans-serif;
+  color: #1e293b;
+}
+
+/* Soft glowing blobs (background depth) */
+body::before,
+body::after {
+  content: "";
+  position: fixed;
+  width: 320px;
+  height: 320px;
+  border-radius: 50%;
+  filter: blur(90px);
+  opacity: 0.4;
+  z-index: -1;
+}
+
+body::before {
+  background: #81ecec;
+  top: -120px;
+  left: -120px;
+}
+
+body::after {
+  background: #a29bfe;
+  bottom: -120px;
+  right: -120px;
+}
+
+/* ================= OUTPUT BOXES ================= */
+.sb-box {
+  width: 100%;
+  max-width: 1200px;
+  margin-bottom: 25px;
+  padding: 20px;
+  border-radius: var(--sb-radius);
+  box-shadow: var(--sb-shadow-soft);
+  transition: transform 0.3s ease, box-shadow 0.5s ease;
+}
+
+/* ================= NOTE PREVIEW ================= */
+#notePreview {
+  background: rgba(255,255,255,0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(0,0,0,0.1);
+  color: var(--sb-text-dark);
+  min-height: 180px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-style: italic;
+}
+
+#notePreview.loaded {
+  /* when note loaded */
+  color: var(--sb-text-dark);
+  font-style: normal;
+}
+
+/* Hover effect */
+#notePreview:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--sb-shadow-hover);
+}
+
+/* ================= HINTS OUTPUT ================= */
+#hintsOutput {
+  background: rgba(255,255,255,0.35);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border: 1px solid rgba(255,255,255,0.6);
+  min-height: 180px;
+  overflow-y: auto;
+  padding: 20px;
+  color: var(--sb-text-dark);
+}
+
+/* Hover */
+#hintsOutput:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--sb-shadow-hover);
+}
+
+/* ================= MCQ OUTPUT ================= */
+#mcqContainer {
+  background: rgba(255,255,255,0.35);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border: 1px solid rgba(255,255,255,0.6);
+  min-height: 200px;
+  padding: 20px;
+  overflow-y: auto;
+  color: var(--sb-text-dark);
+  display: block;
+}
+
+/* MCQ labels hover */
+.mcq-block label {
+  display: block;
+  padding: 12px 16px;
+  border-radius: 12px;
+  cursor: pointer;
+  margin-bottom: 10px;
+  border: 1px solid rgba(22, 110, 139, 0.3);
+  transition: all 0.25s ease;
+}
+.mcq-block label:hover {
+  background: rgba(129,236,236,0.15);
+  color: #81ecec;
+  border-color: #81ecec;
+  transform: translateX(2px);
+}
+
+/* Scrollbar for hints / mcq */
+#hintsOutput::-webkit-scrollbar,
+#mcqContainer::-webkit-scrollbar {
+  width: 10px;
+}
+#hintsOutput::-webkit-scrollbar-track,
+#mcqContainer::-webkit-scrollbar-track {
+  background: rgba(255,255,255,0.1);
+  border-radius: 10px;
+}
+#hintsOutput::-webkit-scrollbar-thumb,
+#mcqContainer::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #81ecec, #a29bfe);
+  border-radius: 10px;
+}
+
+/* ================= TITLES ================= */
+.sb-box h3 {
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin-bottom: 15px;
+  color: var(--sb-text-dark);
+  text-shadow: 0 0 5px rgba(255,255,255,0.3);
+}
+
+/* ================= RESPONSIVE ================= */
+@media (max-width: 600px) {
+  .sb-box { padding: 16px; }
+  #notePreview, #hintsOutput, #mcqContainer { min-height: 150px; }
+  #hintsOutput p, #mcqContainer p, .mcq-block label { font-size: 0.95rem; }
+}
+/* ================= NOTES GRID ================= */
+.notes-grid {
+  width: 100%;
+  max-width: 1000px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 22px;
+  margin-top: 25px;
+}
+
+/* ================= NOTE CARD ================= */
+.note-card {
+  background: var(--sb-glass);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-radius: var(--sb-radius);
+  padding: 20px;
+  min-height: 140px;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+
+  box-shadow: var(--sb-shadow-soft);
+  border: 1px solid rgba(255,255,255,0.6);
+  cursor: default;
+
+  transition: transform 0.35s ease, box-shadow 0.35s ease;
+}
+
+/* hover lift */
+.note-card:hover {
+  transform: translateY(-6px) scale(1.02);
+  box-shadow: var(--sb-shadow-hover);
+}
+
+/* ================= FILE NAME ================= */
+.note-card p {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--sb-text-dark);
+  word-break: break-word;
+  margin-bottom: 16px;
+}
+
+/* ================= STATUS BUTTON ================= */
+.note-card button {
+  align-self: flex-start;
+  padding: 8px 16px;
+  border-radius: 999px;
+  border: none;
+  font-size: 0.8rem;
+  font-weight: 600;
+
+  background: linear-gradient(135deg, var(--sb-brand), var(--sb-accent));
+  color: #fff;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.18);
+  cursor: default;
+}
+
+/* ================= ENTRY ANIMATION ================= */
+.note-card {
+  animation: fadeUp 0.6s ease both;
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+/* ================= DELETE BUTTON ================= */
+.delete-btn {
+  align-self: flex-start;
+  padding: 8px 16px;
+  border-radius: 999px;
+  border: none;
+  font-size: 0.8rem;
+  font-weight: 600;
+
+  background: linear-gradient(135deg, #ff7675, #d63031);
+  color: #fff;
+  cursor: pointer;
+
+  box-shadow: 0 6px 18px rgba(0,0,0,0.18);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.delete-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.25);
+}
+
+</style>
+
+<script>
+// =========================
+// CSRF TOKEN
+// =========================
+function getCSRFToken() {
+  return document.cookie
+    .split("; ")
+    .find(row => row.startsWith("csrftoken"))
+    ?.split("=")[1];
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+
+  const fileInput = document.getElementById("fileInput");
+  const uploadBtn = document.getElementById("uploadBtn");
+  const uploadStatus = document.getElementById("uploadStatus");
+
+  const notesSelect = document.getElementById("notesSelect");
+  const notesGrid = document.getElementById("notesGrid");
+
+  const hintsOutput = document.getElementById("hintsOutput");
+  const mcqContainer = document.getElementById("mcqContainer");
+  const saveQuizBtn = document.getElementById("saveQuizBtn");
+
+  // =========================
+  // UPLOAD NOTES
+  // =========================
+  uploadBtn.addEventListener("click", async () => {
+    if (!fileInput.files.length) {
+      uploadStatus.innerText = "Please select files first.";
+      return;
+    }
+
+    const formData = new FormData();
+    [...fileInput.files].forEach(f => formData.append("notes", f));
+
+    uploadStatus.innerText = "Uploading...";
+
+    const res = await fetch("/upload_notes/", {
+      method: "POST",
+      headers: { "X-CSRFToken": getCSRFToken() },
+      body: formData
+    });
+
+    const data = await res.json();
+
+    if (data.status === "success") {
+      uploadStatus.innerText = "Notes uploaded successfully!";
+      fileInput.value = "";
+      loadFiles();
+    } else {
+      uploadStatus.innerText = "Upload failed.";
+    }
+  });
+
+  // =========================
+  // LOAD NOTES + DELETE
+  // =========================
+  async function loadFiles() {
+    const res = await fetch("/get_notes/");
+    const data = await res.json();
+    const files = data.notes || [];
+
+    notesGrid.innerHTML = "";
+    notesSelect.innerHTML = `<option value="">-- Select a note --</option>`;
+
+    files.forEach(f => {
+
+      // dropdown
+      const opt = document.createElement("option");
+      opt.value = f.file_id;
+      opt.textContent = f.filename;
+      notesSelect.appendChild(opt);
+
+      // card
+      const card = document.createElement("div");
+      card.className = "note-card";
+      card.innerHTML = `
+        <p>${f.filename}</p>
+        <button class="delete-btn">Delete</button>
+      `;
+
+      // DELETE
+      card.querySelector(".delete-btn").addEventListener("click", async () => {
+        if (!confirm("Delete this note?")) return;
+
+        const delRes = await fetch(`/delete_note/${f.file_id}/`, {
+          method: "POST",   // 🔴 IMPORTANT (POST safer than DELETE)
+          headers: {
+            "X-CSRFToken": getCSRFToken()
+          }
+        });
+
+        const result = await delRes.json();
+
+        if (result.status === "deleted") {
+          card.remove();
+          notesSelect.querySelector(`option[value="${f.file_id}"]`)?.remove();
+
+          // clear outputs
+          hintsOutput.innerHTML = "";
+          mcqContainer.innerHTML = "<em>MCQ API output will appear here.</em>";
+        } else {
+          alert("Delete failed");
+        }
+      });
+
+      notesGrid.appendChild(card);
+    });
+  }
+
+  // =========================
+  // GENERATE HINTS
+  // =========================
+  document.getElementById("generateHintsBtn").addEventListener("click", async () => {
+    if (!notesSelect.value) return alert("Select a note!");
+
+    hintsOutput.innerText = "Generating...";
+
+    const res = await fetch("/generate_hint/", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ file_id: notesSelect.value })
+    });
+
+    const data = await res.json();
+    hintsOutput.innerText = (data.hints || []).join("\n");
+  });
+
+  // =========================
+  // INITIAL LOAD
+  // =========================
+  loadFiles();
+});
+</script>
+
+</body>
+</html>

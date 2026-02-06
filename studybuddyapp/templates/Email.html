@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <section id="email-section" class="section">
+  <h2 class="section-title"> Send Feedback / Share Notes</h2>
+  
+  <form id="emailForm" method="POST" class="email-form">
+    {% csrf_token %}
+    <input type="email" name="mail" id="mail" placeholder="Your Email" required class="input-field" />
+    <textarea name="message" id="message" placeholder="Your Message" required class="input-field"></textarea>
+    <button type="submit" class="btn-submit">Send Mail</button>
+    <p id="emailStatus" class="status-msg"></p>
+  </form>
+</section>
+
+
+<style>
+ /* ======================= */
+/* StudyBuddy Email Section */
+/* ======================= */
+/* ======================= */
+/* StudyBuddy Body UI */
+/* ======================= */
+
+body {
+  min-height: 100vh;
+  margin: 0;
+
+  /* Image + Theme Gradient */
+  background:
+    linear-gradient(
+      to bottom right,
+      rgba(129,236,236,0.85),
+      rgba(162,155,254,0.85)
+    ),
+    url("https://images.unsplash.com/photo-1522202176988-66273c2fd55f");
+
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+
+  font-family: 'Poppins', 'Inter', sans-serif;
+  color: #1e293b;
+}
+
+/* Soft glowing blobs (background depth) */
+body::before,
+body::after {
+  content: "";
+  position: fixed;
+  width: 320px;
+  height: 320px;
+  border-radius: 50%;
+  filter: blur(90px);
+  opacity: 0.4;
+  z-index: -1;
+}
+
+body::before {
+  background: #81ecec;
+  top: -120px;
+  left: -120px;
+}
+
+body::after {
+  background: #a29bfe;
+  bottom: -120px;
+  right: -120px;
+}
+
+/* ======================= */
+/* StudyBuddy Email Section */
+/* ======================= */
+
+#email-section {
+  max-width: 520px;
+  margin: 70px auto;
+  padding: 45px 35px;
+  position: relative;
+  overflow: hidden;
+
+  background:
+    radial-gradient(circle at top left, rgba(255,255,255,0.35), transparent 40%),
+    radial-gradient(circle at bottom right, rgba(255,255,255,0.25), transparent 45%),
+    linear-gradient(to bottom right, #81ecec, #a29bfe);
+
+  border-radius: 28px;
+  box-shadow: 0 25px 60px rgba(0,0,0,0.3);
+  color: #ffffff;
+  animation: fadeInUp 0.9s ease forwards;
+}
+
+/* Decorative glow */
+#email-section::before,
+#email-section::after {
+  content: "";
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(70px);
+  opacity: 0.35;
+  z-index: 0;
+}
+
+#email-section::before {
+  width: 240px;
+  height: 240px;
+  background: #ffffff;
+  top: -120px;
+  left: -120px;
+}
+
+#email-section::after {
+  width: 280px;
+  height: 280px;
+  background: #a29bfe;
+  bottom: -140px;
+  right: -140px;
+}
+
+/* Title */
+.section-title {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  font-size: 2.2rem;
+  margin-bottom: 28px;
+  font-weight: 700;
+
+  background: linear-gradient(90deg, #ffffff, #e0e7ff);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+
+  text-shadow: 0 4px 14px rgba(0,0,0,0.25);
+}
+
+/* Form */
+.email-form {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Inputs */
+.input-field {
+  padding: 15px 16px;
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,0.45);
+  font-size: 1rem;
+
+  background: rgba(255,255,255,0.22);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+
+  color: #ffffff;
+  transition: all 0.3s ease;
+}
+
+.input-field::placeholder {
+  color: rgba(255,255,255,0.75);
+}
+
+.input-field:focus {
+  outline: none;
+  background: rgba(255,255,255,0.32);
+  border-color: #ffffff;
+  box-shadow: 0 0 0 3px rgba(162,155,254,0.45);
+}
+
+/* Button */
+.btn-submit {
+  margin-top: 10px;
+  padding: 15px;
+  border-radius: 18px;
+  border: none;
+  font-size: 1.05rem;
+  font-weight: 600;
+  cursor: pointer;
+
+  color: #ffffff;
+  background: linear-gradient(to right, #81ecec, #a29bfe);
+
+  box-shadow: 0 14px 32px rgba(0,0,0,0.35);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.btn-submit:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 22px 45px rgba(0,0,0,0.45);
+}
+
+/* Status */
+.status-msg {
+  margin-top: 14px;
+  text-align: center;
+  font-weight: 600;
+  color: #f8fafc;
+  z-index: 1;
+  position: relative;
+}
+
+/* Animation */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(35px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Mobile */
+@media (max-width: 600px) {
+  #email-section {
+    margin: 40px 16px;
+    padding: 35px 22px;
+  }
+
+  .section-title {
+    font-size: 1.7rem;
+  }
+}
+
+
+ 
+</style>
+
+<script>
+    document.getElementById("emailForm").addEventListener("submit", function(e){
+    e.preventDefault();
+    const form = this;
+    const formData = new FormData(form);
+    const status = document.getElementById("emailStatus");
+
+    status.textContent = "Sending...";
+    status.style.color = "#333";
+
+    fetch("/mail/", {
+        method: "POST",
+        body: formData,
+        headers: {"X-Requested-With": "XMLHttpRequest"}
+    })
+    .then(res => res.json())
+    .then(data => {
+        status.textContent = data.message;
+        status.style.color = data.status === "success" ? "green" : "red";
+        if(data.status === "success") form.reset();
+    })
+    .catch(err => {
+        console.error(err);
+        status.textContent = "Error sending email!";
+        status.style.color = "red";
+    });
+});
+</script>
+</body>
+</html>

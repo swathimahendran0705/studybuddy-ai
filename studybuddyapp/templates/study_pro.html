@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <!-- ================= STUDY PROGRESS ================= -->
+<section id="study-progress" class="section">
+  <h2 class="section-title">📊 Study Progress & Analysis</h2>
+
+  <!-- ANALYTICS CARDS -->
+  <div class="progress-cards">
+    <div class="progress-card">
+      <h3>⏱️ Today</h3>
+      <p id="sp-today">0 min</p>
+    </div>
+
+    <div class="progress-card">
+      <h3>🔥 Streak</h3>
+      <p id="sp-streak">0 days</p>
+    </div>
+
+    <div class="progress-card">
+      <h3>📊 Consistency</h3>
+      <p id="sp-consistency">0%</p>
+    </div>
+
+    <div class="progress-card">
+      <h3>🏆 Best Day</h3>
+      <p id="sp-best">--</p>
+    </div>
+
+    <div class="progress-card">
+      <h3>⚠️ Weak Day</h3>
+      <p id="sp-weak">--</p>
+    </div>
+  </div>
+
+  <!-- CHARTS -->
+  <div class="chart-box">
+    <h3>📅 Daily Study Time</h3>
+    <canvas id="dailyChart"></canvas>
+  </div>
+
+  <div class="chart-box">
+    <h3>📈 Weekly Trend</h3>
+    <canvas id="weeklyChart"></canvas>
+  </div>
+</section>
+<style>
+   /* ============================= */
+/* 📊 STUDY PROGRESS DASHBOARD */
+/* ============================= */
+body {
+  min-height: 100vh;
+  margin: 0;
+
+  /* Image + Theme Gradient */
+  background:
+    linear-gradient(
+      to bottom right,
+      rgba(129,236,236,0.85),
+      rgba(162,155,254,0.85)
+    ),
+    url("https://images.unsplash.com/photo-1522202176988-66273c2fd55f");
+
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+
+  font-family: 'Poppins', 'Inter', sans-serif;
+  color: #1e293b;
+}
+
+/* Soft glowing blobs (background depth) */
+body::before,
+body::after {
+  content: "";
+  position: fixed;
+  width: 320px;
+  height: 320px;
+  border-radius: 50%;
+  filter: blur(90px);
+  opacity: 0.4;
+  z-index: -1;
+}
+
+body::before {
+  background: #81ecec;
+  top: -120px;
+  left: -120px;
+}
+
+body::after {
+  background: #a29bfe;
+  bottom: -120px;
+  right: -120px;
+}
+
+#study-progress {
+  max-width: 1200px;
+  margin: 70px auto;
+  padding: 30px 20px;
+  text-align: center;
+}
+
+/* Section Title */
+.section-title {
+  font-size: 2.1rem;
+  font-weight: 700;
+  margin-bottom: 40px;
+  background: linear-gradient(90deg, #81ecec, #a29bfe);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* ============================= */
+/* METRIC CARDS */
+/* ============================= */
+.progress-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 24px;
+  margin-bottom: 50px;
+}
+
+.progress-card {
+  background: rgba(255,255,255,0.55);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  padding: 22px 20px;
+  border-radius: 20px;
+  box-shadow: 0 14px 40px rgba(0,0,0,0.22);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Accent strip */
+.progress-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 4px;
+  width: 100%;
+  background: linear-gradient(90deg, #81ecec, #a29bfe);
+}
+
+/* Hover lift */
+.progress-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 24px 55px rgba(0,0,0,0.32);
+}
+
+.progress-card h3 {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #6b6b7a;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.progress-card p {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #2e2e38;
+}
+
+/* ============================= */
+/* ANALYSIS CHART BOX */
+/* ============================= */
+.chart-box {
+  background: rgba(255,255,255,0.95);
+  margin-top: 30px;
+  padding: 28px;
+  border-radius: 24px;
+  box-shadow: 0 22px 55px rgba(0,0,0,0.28);
+  position: relative;
+  animation: fadeUp 0.7s ease;
+}
+
+/* Chart heading (optional if you have <h3>) */
+.chart-box h3 {
+  text-align: left;
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin-bottom: 18px;
+  color: #2e2e38;
+}
+
+/* Chart canvas container feel */
+.chart-box canvas {
+  max-width: 100%;
+}
+
+/* ============================= */
+/* SUBTLE ANALYSIS GRID BG */
+/* ============================= */
+.chart-box::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(0,0,0,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,0,0,0.04) 1px, transparent 1px);
+  background-size: 22px 22px;
+  pointer-events: none;
+  border-radius: 24px;
+}
+
+/* ============================= */
+/* ANIMATIONS */
+/* ============================= */
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(25px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ============================= */
+/* 📱 MOBILE */
+/* ============================= */
+@media (max-width: 600px) {
+  .section-title {
+    font-size: 1.6rem;
+  }
+
+  .progress-card p {
+    font-size: 1.6rem;
+  }
+
+  .chart-box {
+    padding: 20px;
+  }
+}
+
+
+</style><script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+
+<script>
+let dailyChart = null;
+let weeklyChart = null;
+
+/* ================= LOAD STUDY PROGRESS ================= */
+function loadStudyProgress() {
+  fetch("/api/progress/")
+    .then(response => {
+      if (!response.ok) throw new Error("API error");
+      return response.json();
+    })
+    .then(data => {
+      console.log("📊 Study Progress Data:", data);
+
+      if (!data || !data.daily_data) {
+        showEmptyState();
+        return;
+      }
+
+      updateStats(data);
+      renderDailyChart(data.daily_data);
+      renderWeeklyChart(data.daily_data);
+    })
+    .catch(error => {
+      console.error("❌ Progress load failed:", error);
+      showEmptyState();
+    });
+}
+
+/* ================= EMPTY STATE ================= */
+function showEmptyState() {
+  document.getElementById("sp-today").textContent = "0 min";
+  document.getElementById("sp-streak").textContent = "0 days";
+  document.getElementById("sp-consistency").textContent = "0%";
+  document.getElementById("sp-best").textContent = "--";
+  document.getElementById("sp-weak").textContent = "--";
+
+  if (dailyChart) dailyChart.destroy();
+  if (weeklyChart) weeklyChart.destroy();
+}
+
+/* ================= UPDATE STATS ================= */
+function updateStats(data) {
+  document.getElementById("sp-today").textContent =
+    (data.today_minutes ?? 0) + " min";
+
+  document.getElementById("sp-streak").textContent =
+    (data.streak ?? 0) + " days";
+
+  document.getElementById("sp-consistency").textContent =
+    (data.consistency ?? 0) + "%";
+
+  document.getElementById("sp-best").textContent =
+    data.best_day || "--";
+
+  document.getElementById("sp-weak").textContent =
+    data.weak_day || "--";
+}
+
+/* ================= DAILY BAR CHART ================= */
+function renderDailyChart(daily) {
+  const labels = daily.map(d => d.date);
+  const values = daily.map(d => d.minutes);
+
+  if (dailyChart) dailyChart.destroy();
+
+  dailyChart = new Chart(document.getElementById("dailyChart"), {
+    type: "bar",
+    data: {
+      labels: labels,
+      datasets: [{
+        label: "Minutes Studied",
+        data: values,
+        borderRadius: 10
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { display: false }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          title: {
+            display: true,
+            text: "Minutes"
+          }
+        },
+        x: {
+          title: {
+            display: true,
+            text: "Date"
+          }
+        }
+      }
+    }
+  });
+}
+
+/* ================= WEEKLY LINE CHART ================= */
+function renderWeeklyChart(daily) {
+  const weeklyData = {};
+
+  daily.forEach(d => {
+    const date = new Date(d.date);
+    const week =
+      date.getFullYear() + "-W" +
+      Math.ceil(
+        (((date - new Date(date.getFullYear(), 0, 1)) / 86400000) +
+          new Date(date.getFullYear(), 0, 1).getDay() + 1) / 7
+      );
+
+    weeklyData[week] = (weeklyData[week] || 0) + d.minutes;
+  });
+
+  if (weeklyChart) weeklyChart.destroy();
+
+  weeklyChart = new Chart(document.getElementById("weeklyChart"), {
+    type: "line",
+    data: {
+      labels: Object.keys(weeklyData),
+      datasets: [{
+        label: "Weekly Study (Minutes)",
+        data: Object.values(weeklyData),
+        tension: 0.4,
+        fill: true
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { display: true }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          title: {
+            display: true,
+            text: "Minutes"
+          }
+        }
+      }
+    }
+  });
+}
+
+/* ================= INIT ================= */
+document.addEventListener("DOMContentLoaded", loadStudyProgress);
+</script>
+
+
+
+</body>
+</html>

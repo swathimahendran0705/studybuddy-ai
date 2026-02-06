@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Login | StudyBuddy</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500&display=swap" rel="stylesheet">
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Baloo 2', cursive;
+}
+
+/* ================= BODY ================= */
+body {
+  background:
+    radial-gradient(circle at top left, rgba(129,236,236,0.35), transparent 60%),
+    radial-gradient(circle at bottom right, rgba(162,155,254,0.35), transparent 60%),
+    linear-gradient(135deg, #f4f7ff, #eef1ff);
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+}
+
+/* ================= FLOATING STUDY IMAGES ================= */
+.floating-img {
+  position: absolute;
+  width: 60px;
+  opacity: 0.25;
+  animation: float 8s infinite ease-in-out;
+}
+
+.floating-img:nth-child(1){ top:10%; left:6%; animation-delay:0s;}
+.floating-img:nth-child(2){ top:18%; right:10%; animation-delay:2s;}
+.floating-img:nth-child(3){ bottom:15%; left:12%; animation-delay:4s;}
+.floating-img:nth-child(4){ bottom:10%; right:18%; animation-delay:6s;}
+
+@keyframes float {
+  0% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-14px) rotate(6deg); }
+  100% { transform: translateY(0) rotate(-6deg); }
+}
+
+/* ================= LOGIN CONTAINER ================= */
+.container {
+  background: rgba(255,255,255,0.85);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  padding: 42px 36px;
+  border-radius: 22px;
+  box-shadow: 0 18px 45px rgba(0,0,0,0.25);
+  width: 330px;
+  text-align: center;
+  z-index: 1;
+  position: relative;
+  animation: popIn 0.6s ease;
+}
+
+/* Accent strip */
+.container::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 5px;
+  width: 100%;
+  border-radius: 22px 22px 0 0;
+  background: linear-gradient(90deg, #81ecec, #a29bfe);
+}
+
+/* ================= LOGO ================= */
+.logo {
+  font-size: 34px;
+  font-weight: 700;
+  margin-bottom: 10px;
+  background: linear-gradient(90deg, #81ecec, #a29bfe);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* ================= HEADING ================= */
+h2 {
+  margin-bottom: 22px;
+  font-size: 1.4rem;
+  color: #2e2e38;
+}
+
+/* ================= INPUTS ================= */
+input[type=text],
+input[type=password] {
+  width: 100%;
+  padding: 12px 15px;
+  margin: 8px 0;
+  border: 1.8px solid #dfe3ff;
+  border-radius: 14px;
+  outline: none;
+  transition: border 0.25s ease, box-shadow 0.25s ease;
+  font-size: 0.95rem;
+}
+
+input:focus {
+  border-color: #81ecec;
+  box-shadow: 0 0 0 2px rgba(129,236,236,0.35);
+}
+
+/* ================= BUTTON ================= */
+button {
+  width: 100%;
+  padding: 12px;
+  margin-top: 18px;
+  background: linear-gradient(135deg, #81ecec, #a29bfe);
+  color: #fff;
+  border: none;
+  border-radius: 14px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 600;
+  box-shadow: 0 10px 22px rgba(0,0,0,0.25);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 18px 35px rgba(0,0,0,0.35);
+}
+
+/* ================= MESSAGE ================= */
+.msg {
+  color: #e53935;
+  margin-bottom: 10px;
+  font-size: 0.85rem;
+}
+
+/* ================= REGISTER LINK ================= */
+.register-link {
+  margin-top: 14px;
+  display: block;
+  color: #6c63ff;
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.register-link:hover {
+  text-decoration: underline;
+}
+
+/* ================= ANIMATION ================= */
+@keyframes popIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+.floating-img {
+  filter: sepia(30%) hue-rotate(200deg);
+}
+
+</style>
+</head>
+<body>
+  <!-- Floating study images -->
+<!-- Floating study images -->
+<img src="https://img.icons8.com/ios-filled/100/timer.png" class="floating-img" />
+<img src="https://img.icons8.com/ios-filled/100/task.png" class="floating-img" />
+<img src="https://img.icons8.com/ios-filled/100/artificial-intelligence.png" class="floating-img" />
+<img src="https://img.icons8.com/ios-filled/100/combo-chart.png" class="floating-img" />
+
+
+
+<div class="container">
+    <div class="logo">📚 SMARTLEARN</div>
+    <h2>Login</h2>
+    {% if msg %}
+    <div class="msg">❌ {{ msg }}</div>
+    {% endif %}
+    <form method="POST">
+        {% csrf_token %}
+        <input type="text" name="name" placeholder="👤 Full Name" required>
+        <input type="password" name="password" placeholder="🔒 Password" required>
+        <button type="submit">Login ✅</button>
+    </form>
+    <a class="register-link" href="/">Don't have an account? Register →</a>
+</div>
+</body>
+</html>

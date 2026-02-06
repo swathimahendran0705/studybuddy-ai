@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <!--AI Assistant  -->
+<section id="ai-section">
+  <h2>🤖 AI Assistant</h2>
+
+  <form method="POST" action="/ask/">
+      {% csrf_token %}
+      <textarea name="question" placeholder="Ask me anything..." style="width:100%; height:120px;"></textarea>
+      <br><br>
+      <button type="submit">Ask</button>
+  </form>
+
+  <div>
+     <h3>{{ answer }}</h3>
+  </div>
+</section>
+
+<style>
+   /* ================= AI ASSISTANT – STUDYBUDDY (THEME MATCHED) ================= */
+
+#ai-section {
+  padding: 80px 20px;
+  background:
+    linear-gradient(to bottom right, rgba(129,236,236,0.92), rgba(162,155,254,0.92)),
+    url("https://images.unsplash.com/photo-1523240795612-9a054b0db644");
+  background-size: cover;
+  background-position: center;
+  border-radius: 26px;
+  box-shadow: 0 25px 55px rgba(0,0,0,0.25);
+  animation: sectionFade 1s ease;
+}
+
+/* ===== Title ===== */
+#ai-section h2 {
+  font-size: 2.8rem;
+  text-align: center;
+  margin-bottom: 35px;
+  background: linear-gradient(90deg, #ffffff, #f1f5f9);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  letter-spacing: 1px;
+  text-shadow: 0 6px 18px rgba(0,0,0,0.25);
+}
+
+/* ===== Glass Form Card ===== */
+#ai-section form {
+  max-width: 760px;
+  margin: auto;
+  padding: 35px;
+  background: rgba(255,255,255,0.25);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-radius: 22px;
+  box-shadow: 0 18px 40px rgba(0,0,0,0.22);
+  transition: transform 0.35s ease, box-shadow 0.35s ease;
+}
+
+#ai-section form:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 28px 55px rgba(0,0,0,0.32);
+}
+
+/* ===== Textarea ===== */
+#ai-section textarea {
+  width: 100%;
+  height: 150px;
+  padding: 16px;
+  font-size: 1rem;
+  border-radius: 16px;
+  border: none;
+  outline: none;
+  resize: none;
+  background: rgba(255,255,255,0.96);
+  color: #1e293b;
+  box-shadow: inset 0 4px 10px rgba(0,0,0,0.12);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+#ai-section textarea:focus {
+  transform: scale(1.015);
+  box-shadow: 0 0 0 3px rgba(162,155,254,0.45);
+}
+
+/* ===== Ask Button ===== */
+#ai-section button {
+  margin-top: 22px;
+  width: 100%;
+  padding: 15px;
+  font-size: 1.05rem;
+  font-weight: 600;
+  border-radius: 32px;
+  border: none;
+  cursor: pointer;
+  background: linear-gradient(to right, #81ecec, #a29bfe);
+  color: #ffffff;
+  box-shadow: 0 12px 28px rgba(0,0,0,0.28);
+  transition: all 0.35s ease;
+}
+
+#ai-section button:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 45px rgba(0,0,0,0.38);
+}
+
+/* ===== Answer Box ===== */
+#ai-section h3 {
+  margin-top: 35px;
+  padding: 28px;
+  max-width: 760px;
+  margin-left: auto;
+  margin-right: auto;
+  background: #ffffff;
+  border-radius: 22px;
+  font-size: 1.05rem;
+  color: #1e293b;
+  line-height: 1.7;
+  box-shadow: 0 18px 40px rgba(0,0,0,0.2);
+  animation: answerPop 0.5s ease;
+}
+
+/* ================= Animations ================= */
+
+@keyframes sectionFade {
+  from {
+    opacity: 0;
+    transform: translateY(45px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes answerPop {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* ===== Mobile ===== */
+@media (max-width: 600px) {
+  #ai-section h2 {
+    font-size: 2.1rem;
+  }
+
+  #ai-section form {
+    padding: 25px;
+  }
+}
+
+
+</style>
+<script>
+    // ===== AI Ask (single safe listener) =====
+const askBtn = document.getElementById("askBtn");
+
+if (askBtn) {
+  askBtn.addEventListener("click", async () => {
+    const question = document.getElementById("aiInput")?.value || "";
+    const output = document.getElementById("aiOutput");
+
+    if (!question.trim()) {
+      if (output) output.innerHTML = "⚠️ Type something...";
+      return;
+    }
+
+    if (output) output.innerHTML = "Thinking...";
+
+    try {
+      const response = await fetch("/api/ask/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": getCookie("csrftoken")
+        },
+        body: JSON.stringify({ question })
+      });
+
+      const data = await response.json();
+      if (output) output.innerHTML = data.answer || "No answer.";
+    } catch (err) {
+      console.error("AI ask error:", err);
+      if (output) output.innerHTML = "❌ AI server error.";
+    }
+  });
+}
+
+// ================== CSRF Token Helper ==================
+function getCookie(name) {
+  let cookieValue = null;
+
+  if (document.cookie && document.cookie !== "") {
+    const cookies = document.cookie.split(";");
+
+    for (let cookie of cookies) {
+      cookie = cookie.trim();
+      if (cookie.startsWith(name + "=")) {
+        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+        break;
+      }
+    }
+  }
+  return cookieValue;
+}
+
+</script>
+</body>
+</html>

@@ -1,0 +1,15 @@
+# Python
+__pycache__/
+*.pyc
+
+# Django
+db.sqlite3
+.env
+
+# Media / temp
+tempfile.pdf
+media/
+
+# Virtual environment
+env/
+venv/

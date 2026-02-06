@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+   <!-- UPLOAD NOTES -->
+<div class="notes-container">
+  <h2>Upload Your Notes</h2>
+
+  <input type="file" id="fileInput" name="notes" multiple />
+
+  <button id="uploadBtn">Upload Files</button>
+
+  <p id="uploadStatus"></p>
+  <div id="notesGrid" class="notes-grid"></div>
+</div>
+
+<!-- =========================
+     HINTS MAKER + MCQ SECTION
+========================= -->
+<div class="hints-container">
+  <h2>MCQ Generator</h2>
+
+  <!-- Top Controls -->
+  <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:15px;">
+    <select id="notesSelect">
+      <option value="">-- Select a note --</option>
+    </select>
+
+    <button id="previewNoteBtn">-></button>
+    <button id="generateHintsBtn">-></button>
+    <button id="generateMcqApiBtn">Generate MCQ (API)</button>
+  </div>
+
+  
+
+  <!-- HINTS OUTPUT BOX -->
+  <div id="hintsOutput" class="sb-box"></div>
+
+  <!-- Save Hints Buttons -->
+  <div style="margin-top:10px;">
+    <button id="savePdfBtn" style="display:none;">Save Hints PDF</button>
+    <button id="saveHintsBtn" style="display:none;">Save Hints to DB</button>
+  </div>
+
+  <!-- MCQ QUIZ API OUTPUT -->
+  <div id="mcqContainer" class="sb-box" 
+       style="display:block; min-height:200px; border:1px solid #ccc; padding:10px; background:#fefefe; margin-top:15px;">
+    <em>MCQ API output will appear here.</em>
+  </div>
+
+  <!-- Save Quiz Button -->
+  <button id="saveQuizBtn" style="display:none; margin-top:10px;">Save Quiz to DB</button>
+
+  <!-- MCQ SCORE -->
+  <div id="mcqScore" style="margin-top:15px; font-size:18px; font-weight:bold;"></div>
+
+  <h3 style="margin-top:20px;">Saved Hints</h3>
+  <div id="savedHints"></div>
+</div>
+<style>
+:root {
+  --sb-brand: #6c63ff;        /* main brand */
+  --sb-accent: #00c2ff;      /* focus accent */
+  --sb-bg: #f4f7ff;          /* app background */
+  --sb-card: #ffffff;
+  --sb-glass: rgba(255,255,255,0.55);
+
+  --sb-text-dark: #2e2e38;
+  --sb-text-soft: #6b6b7a;
+
+  --sb-radius: 18px;
+  --sb-shadow-soft: 0 12px 30px rgba(0,0,0,0.12);
+  --sb-shadow-hover: 0 20px 45px rgba(0,0,0,0.22);
+}
+body {
+  min-height: 100vh;
+  margin: 0;
+
+  /* Image + Theme Gradient */
+  background:
+    linear-gradient(
+      to bottom right,
+      rgba(129,236,236,0.85),
+      rgba(162,155,254,0.85)
+    ),
+    url("https://images.unsplash.com/photo-1522202176988-66273c2fd55f");
+
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+
+  font-family: 'Poppins', 'Inter', sans-serif;
+  color: #1e293b;
+}
+
+/* Soft glowing blobs (background depth) */
+body::before,
+body::after {
+  content: "";
+  position: fixed;
+  width: 320px;
+  height: 320px;
+  border-radius: 50%;
+  filter: blur(90px);
+  opacity: 0.4;
+  z-index: -1;
+}
+
+body::before {
+  background: #81ecec;
+  top: -120px;
+  left: -120px;
+}
+
+body::after {
+  background: #a29bfe;
+  bottom: -120px;
+  right: -120px;
+}
+
+.notes-container {
+  background: var(--sb-card);
+  border-radius: var(--sb-radius);
+  padding: 28px;
+  box-shadow: var(--sb-shadow-soft);
+  position: relative;
+}
+
+/* brand strip */
+.notes-container::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 5px;
+  width: 100%;
+  background: linear-gradient(
+    90deg,
+    var(--sb-brand),
+    var(--sb-accent)
+  );
+  border-radius: 18px 18px 0 0;
+}
+
+.notes-container:hover {
+  box-shadow: var(--sb-shadow-hover);
+  transform: translateY(-4px);
+}
+.note-card {
+  background: #fff;
+  border-radius: 14px;
+  padding: 14px;
+  border: 1px solid #eef0ff;
+  transition: 0.3s ease;
+}
+
+.note-card:hover {
+  border-color: var(--sb-brand);
+  transform: translateY(-6px);
+}
+.hints-container {
+  background:
+    linear-gradient(
+      rgba(108,99,255,0.06),
+      rgba(0,194,255,0.06)
+    );
+  border-radius: 22px;
+  padding: 28px;
+  box-shadow: var(--sb-shadow-soft);
+}
+#notePreview,
+#hintsOutput,
+#mcqContainer,
+.mcq-block {
+  background: var(--sb-glass);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,0.6);
+}
+.mcq-block label {
+  padding: 10px 14px;
+  border-radius: 10px;
+  transition: 0.2s ease;
+}
+
+.mcq-block label:hover {
+  background: rgba(108,99,255,0.12);
+  color: var(--sb-brand);
+}
+button {
+  background: linear-gradient(
+    135deg,
+    var(--sb-brand),
+    var(--sb-accent)
+  );
+  color: #fff;
+  border-radius: 14px;
+  font-weight: 600;
+  box-shadow: 0 10px 24px rgba(0,0,0,0.18);
+}
+
+button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 16px 36px rgba(0,0,0,0.28);
+}
+
+
+</style>
+
+<script>
+   
+// =========================
+// CSRF TOKEN
+// =========================
+function getCSRFToken() {
+  return document.cookie
+    .split("; ")
+    .find(row => row.startsWith("csrftoken"))
+    ?.split("=")[1];
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  const fileInput = document.getElementById("fileInput");
+  const uploadBtn = document.getElementById("uploadBtn");
+  const uploadStatus = document.getElementById("uploadStatus");
+
+  const notesSelect = document.getElementById("notesSelect");
+  const notePreview = document.getElementById("notePreview");
+  const hintsOutput = document.getElementById("hintsOutput");
+  const mcqContainer = document.getElementById("mcqContainer");
+  const saveQuizBtn = document.getElementById("saveQuizBtn");
+
+  // =========================
+  // UPLOAD NOTES HANDLER
+  // =========================
+  uploadBtn.addEventListener("click", async () => {
+    const files = fileInput.files;
+
+    if (!files || files.length === 0) {
+      uploadStatus.innerText = "Please select files first.";
+      return;
+    }
+
+    const formData = new FormData();
+    for (let i = 0; i < files.length; i++) {
+      formData.append("notes", files[i]);
+    }
+
+    uploadStatus.innerText = "Uploading...";
+
+    try {
+      const res = await fetch("/upload_notes/", {
+        method: "POST",
+        headers: {
+          "X-CSRFToken": getCSRFToken()
+        },
+        body: formData
+      });
+
+      const data = await res.json();
+
+      if (data.status === "success") {
+        uploadStatus.innerText = "Notes uploaded successfully!";
+        fileInput.value = "";
+        loadFiles(); // refresh dropdown
+      } else {
+        uploadStatus.innerText = "Upload failed.";
+      }
+    } catch (err) {
+      console.error(err);
+      uploadStatus.innerText = "Server error during upload.";
+    }
+  });
+
+  // =========================
+  // LOAD NOTES DROPDOWN
+  // =========================
+  async function loadFiles() {
+    const res = await fetch("/get_notes/");
+    const data = await res.json();
+    const files = data.notes || [];
+    notesSelect.innerHTML = '<option value="">-- Select a note --</option>';
+    files.forEach(f => {
+      const opt = document.createElement("option");
+      opt.value = f.file_id;
+      opt.textContent = f.filename;
+      notesSelect.appendChild(opt);
+    });
+  }
+  loadFiles();
+
+  // =========================
+  // PREVIEW NOTE
+  // =========================
+  document.getElementById("previewNoteBtn").addEventListener("click", async () => {
+    const file_id = notesSelect.value;
+    if (!file_id) return alert("Select a note!");
+    notePreview.innerText = "Loading...";
+    const res = await fetch(`/preview_note/${file_id}/`);
+    const data = await res.json();
+    notePreview.innerText = data.content || "No preview available";
+  });
+  // =========================
+  // GENERATE HINTS
+  // =========================
+  document.getElementById("generateHintsBtn").addEventListener("click", async () => {
+    const file_id = notesSelect.value;
+    if (!file_id) return alert("Select a note!");
+    hintsOutput.innerText = "Generating...";
+    const res = await fetch("/generate_hint/", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ file_id })
+    });
+    const data = await res.json();
+    const hints = data.hints || [];
+    hintsOutput.innerText = hints.join("\n");
+    document.getElementById("saveHintsBtn").style.display = "inline-block";
+    document.getElementById("savePdfBtn").style.display = "inline-block";
+    document.getElementById("saveHintsBtn").dataset.hints = JSON.stringify(hints);
+    document.getElementById("savePdfBtn").dataset.hints = JSON.stringify(hints);
+  });
+
+  // =========================
+  // GENERATE MCQ (API)
+  // =========================
+  document.getElementById("generateMcqApiBtn").addEventListener("click", async () => {
+    const file_id = notesSelect.value;
+    if (!file_id) return alert("Select a note!");
+
+    mcqContainer.innerHTML = "<em>Generating MCQs...</em>";
+    saveQuizBtn.style.display = "none";
+
+    try {
+      const res = await fetch("/generate_mcq_api/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ file_id })
+      });
+      const data = await res.json();
+      const quizText = data.quiz || "";
+
+      if (!quizText.trim()) {
+        mcqContainer.innerHTML = "<p>No MCQs generated.</p>";
+        return;
+      }
+
+      // Parse MCQ text
+      const mcqs = quizText.split(/\n\n+/).map(block => {
+        const lines = block.split("\n").map(l => l.trim());
+        return {
+          question: lines[0]?.replace(/^Q\d+:\s*/, "") || "",
+          options: lines.slice(1,5).map(opt => opt.replace(/^[A-D]\.\s*/, "")),
+          answer: lines[5]?.replace(/^Answer:\s*/, "") || "A",
+          explanation: ""
+        };
+      });
+
+      // Render MCQs
+      let html = "";
+      mcqs.forEach((q, idx) => {
+        html += `<div class="mcq-block" data-idx="${idx}">
+          <p><b>Q${idx + 1}:</b> ${q.question}</p>
+          ${q.options.map((opt, i) => `
+            <label><input type="radio" name="q${idx}" value="${String.fromCharCode(65+i)}"> ${String.fromCharCode(65+i)}. ${opt}</label><br>
+          `).join("")}
+          <div class="explain" id="exp${idx}" style="display:none; margin-top:6px; background:#f8f8f8; padding:6px; border-radius:4px;">
+            <b>Correct:</b> ${q.answer} &nbsp; <span id="ansText${idx}"></span>
+            <div style="margin-top:4px;"><b>Explanation:</b> ${q.explanation || "—"}</div>
+          </div>
+        </div><hr>`;
+      });
+      html += `<button id="submitMcqApi">Submit Quiz</button> <div id="mcqScore"></div>`;
+      mcqContainer.innerHTML = html;
+      mcqContainer.scrollIntoView({ behavior: "smooth" });
+
+      // Store MCQs for saving
+      saveQuizBtn.dataset.quiz = JSON.stringify(mcqs);
+      saveQuizBtn.style.display = "inline-block";
+
+      // Submit scoring
+      document.getElementById("submitMcqApi").addEventListener("click", () => {
+        let score = 0;
+        mcqs.forEach((q, idx) => {
+          const sel = document.querySelector(`input[name="q${idx}"]:checked`);
+          const chosen = sel ? sel.value : null;
+          if (chosen === q.answer) score++;
+          const ansIndex = q.answer.charCodeAt(0) - 65;
+          const ansText = q.options[ansIndex] || "";
+          document.getElementById(`ansText${idx}`).textContent = ansText;
+          document.getElementById(`exp${idx}`).style.display = "block";
+        });
+        const total = mcqs.length;
+        document.getElementById("mcqScore").innerHTML = `<h3>Score: ${score} / ${total} (${Math.round(score/total*100)}%)</h3>`;
+      });
+
+    } catch (err) {
+      console.error(err);
+      mcqContainer.innerHTML = "<p>Error generating MCQs. Try again.</p>";
+    }
+  });
+
+  // =========================
+  // SAVE QUIZ
+  // =========================
+  saveQuizBtn.addEventListener("click", async (e) => {
+    const quiz = JSON.parse(e.target.dataset.quiz || "[]");
+    if (!quiz.length) return alert("No quiz to save!");
+    try {
+      await fetch("/save_quiz/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ quiz })
+      });
+      alert("Quiz saved successfully!");
+    } catch (err) {
+      console.error(err);
+      alert("Error saving quiz.");
+    }
+  });
+
+});
+ 
+</script>
+</body>
+</html>

@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <!-- Pomodoro Timer -->
+<section id="pomodoro-section" class="section fullscreen-section">
+  <h2>🕒 Pomodoro Timer</h2>
+
+  <div class="pomodoro-container">
+
+    <div class="circle">
+      <svg>
+        <circle cx="100" cy="100" r="90"></circle>
+        <circle cx="100" cy="100" r="90" id="progress-circle"></circle>
+      </svg>
+
+      <div id="timer-display">25:00</div>
+    </div>
+
+    <div class="pomodoro-buttons">
+      <button id="startBtn" >▶️ Start</button>
+      <button id="pauseBtn" >⏸️ Pause</button>
+      <button id="resetBtn" >🔁 Reset</button>
+      <button id="finishBtn"  onclick="finishPomodoro()">✅ Finish</button>
+
+
+
+     
+    </div>
+
+    <div class="pomodoro-stats">
+      🔥 Your Study Streak:
+      <span id="streak-count">0</span> days  
+      <br>
+      📘 Today Studied:
+      <span id="today-minutes">0</span> minutes
+    </div>
+
+  </div>
+
+
+
+  <style>
+    /* =================== BODY – FULL THEME =================== */
+body {
+  margin: 0;
+  font-family: 'Poppins', sans-serif;
+  min-height: 100vh;
+  color: #ffffff;
+
+  background:
+    linear-gradient(to bottom right, rgba(129,236,236,0.85), rgba(162,155,254,0.85)),
+    url("https://images.unsplash.com/photo-1522202176988-66273c2fd55f");
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  overflow-x: hidden;
+  position: relative;
+  padding-top: 40px;
+}
+
+/* Soft glowing blobs */
+body::before,
+body::after {
+  content: '';
+  position: fixed;
+  border-radius: 50%;
+  filter: blur(100px);
+  opacity: 0.35;
+  z-index: -1;
+}
+
+body::before {
+  width: 340px;
+  height: 340px;
+  background: #81ecec;
+  top: -160px;
+  left: -160px;
+}
+
+body::after {
+  width: 380px;
+  height: 380px;
+  background: #a29bfe;
+  bottom: -160px;
+  right: -160px;
+}
+
+/* =================== POMODORO CONTAINER =================== */
+.pomodoro-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 28px;
+  padding: 36px;
+  border-radius: 28px;
+
+  background: rgba(255,255,255,0.18);
+  backdrop-filter: blur(22px);
+  -webkit-backdrop-filter: blur(22px);
+
+  box-shadow: 0 25px 65px rgba(0,0,0,0.35);
+  position: relative;
+  z-index: 1;
+
+  transition: transform 0.35s ease, box-shadow 0.35s ease;
+}
+
+.pomodoro-container:hover {
+  transform: translateY(-6px) scale(1.03);
+  box-shadow: 0 40px 90px rgba(0,0,0,0.45);
+}
+
+/* =================== CIRCLE (Structure untouched) =================== */
+.circle {
+  position: relative;
+  width: 280px;
+  height: 280px;
+  max-width: 80vw;
+  max-height: 80vw;
+  display: flex;
+  justify-content: center;
+  align-items: center; /* keeps timer number centered */
+}
+
+.circle svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+.circle svg circle:first-child {
+  fill: none;
+  stroke: rgba(255,255,255,0.25);
+  stroke-width: 14;
+  stroke-linecap: round;
+}
+
+#progress-circle {
+  fill: none;
+  stroke-width: 14;
+  stroke-linecap: round;
+  stroke: url(#grad1);
+  stroke-dasharray: 565.48;
+  stroke-dashoffset: 565.48;
+
+  filter:
+    drop-shadow(0 0 12px #ffffff)
+    drop-shadow(0 0 20px #81ecec)
+    drop-shadow(0 0 30px #a29bfe);
+
+  transition: stroke-dashoffset 1s linear;
+}
+
+.circle svg circle:nth-child(3) {
+  fill: none;
+  stroke: rgba(255,255,255,0.15);
+  stroke-width: 6;
+  stroke-dasharray: 5 10;
+  stroke-linecap: round;
+  animation: rotateCircle 30s linear infinite;
+}
+
+@keyframes rotateCircle {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* =================== TIMER NUMBER (Center aligned exactly) =================== */
+#timer-display {
+  position: absolute;
+  top: 60%;
+  left: 36%;
+  transform: translate(-50%, -50%);
+  font-size: clamp(26px, 10vw, 50px);
+  font-weight: 900;
+  color: #ffffff;
+  text-shadow:
+    0 0 10px #ffffff,
+    0 0 22px #81ecec,
+    0 0 36px #a29bfe;
+  animation: pulse 1.6s infinite;
+  z-index: 10; /* above rings */
+}
+
+@keyframes pulse {
+  0%,100% { transform: translate(-50%, -50%) scale(1); }
+  50% { transform: translate(-50%, -50%) scale(1.12); }
+}
+
+/* =================== BUTTONS =================== */
+.pomodoro-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 16px;
+}
+
+.pomodoro-buttons button {
+  padding: 14px 30px;
+  font-size: 15px;
+  font-weight: 700;
+  border-radius: 16px;
+  border: none;
+  cursor: pointer;
+  color: #ffffff;
+
+  background: linear-gradient(to right, #81ecec, #a29bfe);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.25s ease, box-shadow 0.3s ease;
+}
+
+.pomodoro-buttons button::after {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: -100%;
+  background: rgba(135,206,235,0.2);
+  transform: skewX(-20deg);
+  transition: 0.5s;
+}
+
+.pomodoro-buttons button:hover::after { left: 100%; }
+.pomodoro-buttons button:hover {
+  transform: scale(1.08);
+  box-shadow: 0 18px 45px rgba(0,0,0,0.45);
+}
+.pomodoro-buttons button:active {
+  transform: scale(0.97);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+}
+
+/* =================== STATS =================== */
+.pomodoro-stats {
+  font-size: 17px;
+  text-align: center;
+  line-height: 1.6;
+  background: rgba(255,255,255,0.18);
+  backdrop-filter: blur(14px);
+  padding: 18px 30px;
+  border-radius: 22px;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.35);
+  animation: fadeIn 1.5s ease;
+}
+
+@keyframes fadeIn {
+  0% { opacity: 0; transform: translateY(15px);}
+  100% { opacity: 1; transform: translateY(0);}
+}
+
+/* =================== MOBILE =================== */
+@media (max-width: 600px) {
+  .pomodoro-container { padding: 26px; }
+  .pomodoro-buttons button { width: 48%; padding: 12px 0; }
+  #timer-display { font-size: clamp(28px, 12vw, 48px); }
+  .pomodoro-stats { font-size: 16px; padding: 15px 18px; }
+}
+
+  </style>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+  const startBtn = document.getElementById("startBtn");
+  const pauseBtn = document.getElementById("pauseBtn");
+  const resetBtn = document.getElementById("resetBtn");
+  const timerDisplay = document.getElementById("timer-display");
+  const circle = document.getElementById("progress-circle");
+
+  let timer;
+  let startTimestamp = null;
+  const studyDuration = 25 * 60;
+  let timeLeft = studyDuration;
+  let isRunning = false;
+
+  function updateDisplay() {
+    const m = Math.floor(timeLeft / 60);
+    const s = timeLeft % 60;
+    timerDisplay.textContent = `${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`;
+    const progress = 565.48 * (1 - timeLeft / studyDuration);
+    circle.style.strokeDashoffset = progress;
+  }
+
+  function startTimer() {
+    if (isRunning) return;
+    isRunning = true;
+    startTimestamp = new Date();
+    timer = setInterval(() => {
+      if (timeLeft > 0) {
+        timeLeft--;
+        updateDisplay();
+      } else {
+        clearInterval(timer);
+        isRunning = false;
+        alert("Pomodoro done!");
+      }
+    }, 1000);
+  }
+
+  function pauseTimer() {
+    clearInterval(timer);
+    isRunning = false;
+  }
+
+  function resetTimer() {
+    clearInterval(timer);
+    timeLeft = studyDuration;
+    isRunning = false;
+    updateDisplay();
+  }
+
+  startBtn.addEventListener("click", startTimer);
+  pauseBtn.addEventListener("click", pauseTimer);
+  resetBtn.addEventListener("click", resetTimer);
+
+  // ===== Save Pomodoro =====
+  window.finishPomodoro = function () {
+    if (!startTimestamp)
+      return alert("⚠️ Start the timer first!");
+
+    const endTimestamp = new Date();
+    const diffSeconds = Math.floor((endTimestamp - startTimestamp) / 1000);
+    const minutesSpent = Math.max(1, Math.round(diffSeconds / 60));
+
+    fetch("/api/pomodoro/save/", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ minutes: minutesSpent })
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        alert(`✅ Saved: ${minutesSpent} minutes`);
+        loadStreak();
+        loadTodayMinutes();
+      } else {
+        alert("❌ Error: " + (data.error || "Try again later"));
+      }
+    })
+    .catch(err => { console.error(err); alert("❌ Server error"); });
+  };
+
+  // ===== Load Streak & Today Minutes =====
+  function loadStreak() {
+    fetch("/api/streak/")
+      .then(res => res.json())
+      .then(data => document.getElementById("streak-count").textContent = data.streak || 0)
+      .catch(err => console.error("Streak error:", err));
+  }
+
+  function loadTodayMinutes() {
+    fetch("/api/today/")
+      .then(res => res.json())
+      .then(data => document.getElementById("today-minutes").textContent = data.today || 0)
+      .catch(err => console.error("Today minutes error:", err));
+  }
+
+  // ===== Initial load =====
+  loadStreak();
+  loadTodayMinutes();
+  updateDisplay();
+});
+
+  </script>
+</section>
+</body>
+</html>
