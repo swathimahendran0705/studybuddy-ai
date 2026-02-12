@@ -20,8 +20,8 @@ load_dotenv()
 SECRET_KEY = os.getenv("SECRET_KEY")
 DEBUG = os.getenv("DEBUG") == "True"
 
-MONGO_URI = os.getenv("MONGO_URI")
 MONGO_DB = os.getenv("MONGO_DB")
+MONGO_URI = os.getenv("MONGO_URL")
 
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 
@@ -41,7 +41,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: don't run with debug turned on in production!
 
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [*]
 
 
 # Application definition
@@ -157,7 +157,9 @@ from pymongo import MongoClient
 
 
 client = MongoClient(MONGO_URI)
-mongo_db = client[MONGO_DB]
+
+mongo_db = client["studybuddy"]
+
 notes_col = mongo_db["notes"]
 
 
