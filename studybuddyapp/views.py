@@ -96,37 +96,71 @@ import json
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 
+def save_pomodoro(user_id, minutes):
+    today = datetime.utcnow().strftime("%Y-%m-%d")
+    pomodoro_col.update_one(
+        {"user_id": user_id, "date": today},
+        {"$inc": {"minutes": minutes}},
+        upsert=True
+    )
+
+def get_today_minutes(user_id):
+    today = datetime.utcnow().strftime("%Y-%m-%d")
+    entry = pomodoro_col.find_one({"user_id": user_id, "date": today})
+    return entry.get("minutes", 0) if entry else 0
+
+def get_streak(user_id):
+    streak = 0
+    today = datetime.utcnow().date()
+    for i in range(30):  # last 30 days
+        day = (today - timedelta(days=i)).strftime("%Y-%m-%d")
+        entry = pomodoro_col.find_one({"user_id": user_id, "date": day})
+        if entry and entry.get("minutes", 0) >= 25:
+            streak += 1
+        else:
+            break
+    return streak
+
+# ================= API endpoints =================
+
 @csrf_exempt
 def save_pomodoro_api(request):
     if request.method == "POST":
-        data = json.loads(request.body.decode("utf-8"))
-        minutes = int(data.get("minutes", 0))
-        if minutes <= 0:
-            return JsonResponse({"success": False, "error": "Minutes missing"})
-        save_pomodoro("guest", minutes)
-        return JsonResponse({"success": True})
+        try:
+            data = json.loads(request.body.decode("utf-8"))
+            minutes = int(data.get("minutes", 0))
+            if minutes <= 0:
+                return JsonResponse({"success": False, "error": "Minutes missing"})
+            save_pomodoro("guest", minutes)
+            return JsonResponse({"success": True})
+        except Exception as e:
+            return JsonResponse({"success": False, "error": str(e)})
     return JsonResponse({"error": "Invalid method"}, status=405)
-    pomodoro_col.insert_one({
-        "user_id": user_id,
-        "minutes": minutes,
-        "date": datetime.utcnow().strftime("%Y-%m-%d")  # format as YYYY-MM-DD
-    })
+
 
 def today_minutes_api(request):
-    minutes = get_today_minutes("guest")
-    return JsonResponse({"today": minutes})
+    try:
+        minutes = get_today_minutes("guest")
+        return JsonResponse({"today": minutes})
+    except Exception as e:
+        return JsonResponse({"today": 0, "error": str(e)})
+
 
 def streak_api(request):
-    streak = get_streak("guest")
-    return JsonResponse({"streak": streak})
-from django.http import JsonResponse
-from studybuddyapp.models import get_study_progress
+    try:
+        streak = get_streak("guest")
+        return JsonResponse({"streak": streak})
+    except Exception as e:
+        return JsonResponse({"streak": 0, "error": str(e)})
+
 
 def study_progress_api(request):
-    user = "guest"
-    data = get_study_progress(user)
-    print("DEBUG data:", data)
-    return JsonResponse(data)
+    from studybuddyapp.models import get_study_progress
+    try:
+        data = get_study_progress("guest")
+        return JsonResponse(data)
+    except Exception as e:
+        return JsonResponse({"error": str(e)})
 
 
 

@@ -138,15 +138,24 @@ TIME_ZONE = 'Asia/Kolkata'
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 
-
+# Static files (CSS, JS, Images)
 STATIC_URL = '/static/'
+
+# Local app static folders
 STATICFILES_DIRS = [
-    BASE_DIR / "studybuddyapp" / "static"
+    BASE_DIR / "studybuddyapp" / "static",  # your app static folder
 ]
 
+# Production static folder for collectstatic
+STATIC_ROOT = BASE_DIR / "staticfiles"
 
+# Media files (user uploads)
 MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+MEDIA_ROOT = BASE_DIR / "media"
+
+
+
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field

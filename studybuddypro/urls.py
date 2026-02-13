@@ -18,7 +18,9 @@ urlpatterns = [
     path('api/pomodoro/save/', views.save_pomodoro_api, name='save_pomodoro_api'),
     path('api/today/', views.today_minutes_api, name='today_minutes_api'),
     path('api/streak/', views.streak_api, name='streak_api'),
-
+    
+    
+    
     # Notes Upload
     path('uploaded/', views.uploaded, name='uploaded'),
     path("upload_notes/", views.upload_notes),
