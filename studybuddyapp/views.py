@@ -44,7 +44,8 @@ from studybuddyapp.models import (
 
 
 # MongoDB connection
-client = MongoClient("mongodb://localhost:27017")
+
+client = MongoClient(settings.MONGO_URI)
 db = client['studybuddy']
 collection = db['users']
 
@@ -444,34 +445,40 @@ def register(request):
         password = request.POST.get("password")
         confirm_password = request.POST.get("confirm-password")
 
-        # Password match check
         if password != confirm_password:
             return render(request, 'register.html', {"msg": "Passwords do not match"})
 
-        # Check if email already exists
         if collection.find_one({"email": email}):
             return render(request, 'register.html', {"msg": "Email already registered"})
 
-        # Insert into MongoDB
+        # Hash password here ✅
+        hashed = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
         data = {
             "name": name,
             "email": email,
-            "password": password  # For production, hash this!
+            "password": hashed
         }
         collection.insert_one(data)
+
         return redirect('/login')
 
     return render(request, 'register.html')
+
+
+import bcrypt
 
 def login(request):
     if request.method == 'POST':
         name = request.POST.get('name')
         password = request.POST.get('password')
 
-        user = collection.find_one({"name": name, "password": password})
-        if user:
+        # Find user by name only
+        user = collection.find_one({"name": name})
+        if user and bcrypt.checkpw(password.encode('utf-8'), user["password"]):
+            # Login success
             return redirect('/home')
         else:
+            # Invalid login
             return render(request, 'login.html', {"msg": "Invalid name/password"})
 
     return render(request, 'login.html')
