@@ -96,30 +96,7 @@ import json
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 
-def save_pomodoro(user_id, minutes):
-    today = datetime.utcnow().strftime("%Y-%m-%d")
-    pomodoro_col.update_one(
-        {"user_id": user_id, "date": today},
-        {"$inc": {"minutes": minutes}},
-        upsert=True
-    )
 
-def get_today_minutes(user_id):
-    today = datetime.utcnow().strftime("%Y-%m-%d")
-    entry = pomodoro_col.find_one({"user_id": user_id, "date": today})
-    return entry.get("minutes", 0) if entry else 0
-
-def get_streak(user_id):
-    streak = 0
-    today = datetime.utcnow().date()
-    for i in range(30):  # last 30 days
-        day = (today - timedelta(days=i)).strftime("%Y-%m-%d")
-        entry = pomodoro_col.find_one({"user_id": user_id, "date": day})
-        if entry and entry.get("minutes", 0) >= 25:
-            streak += 1
-        else:
-            break
-    return streak
 
 # ================= API endpoints =================
 
