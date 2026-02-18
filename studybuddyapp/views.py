@@ -607,7 +607,7 @@ def contact(request):
 
 
 def pomodoro(request):
-    return render(request, 'pomodoro.html')
+    return render(request, 'Pomodoro.html')
 
 def index(request):
     return render(request, 'index.html')
