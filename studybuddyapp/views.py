@@ -429,9 +429,9 @@ def mail(request):
 
         try:
             send_mail(
-                subject="Message from StudyBuddy",
+                subject="Message from SmartLearn(SPM)",
                 message=message,
-                from_email="swathimahendran0705@gmail.com",  # FROM
+                from_email=settings.DEFAULT_FROM_EMAIL,  # FROM
                 recipient_list=[to_mail],                   # TO
                 fail_silently=False
             )
